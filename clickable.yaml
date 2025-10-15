@@ -1,0 +1,7 @@
+clickable_minimum_required: 8.0.0
+builder: cmake
+kill: linux-desktop-monitor.com.bluebird-documentation.linux-desktop-monitor
+
+# Install Python script and make it executable
+install_data:
+  ssh_monitor.py: /

@@ -1,0 +1,7 @@
+[Desktop Entry]
+_Name=Linux Desktop Monitor
+Exec=linux-desktop-monitor.com.bluebird-documentation.linux-desktop-monitor
+Icon=assets/logo.svg
+Terminal=false
+Type=Application
+X-Lomiri-Touch=true
