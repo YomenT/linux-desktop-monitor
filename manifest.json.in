@@ -1,6 +1,6 @@
 {
     "name": "linux-desktop-monitor.com.bluebird-documentation.linux-desktop-monitor",
-    "description": "A tool to monitor and manage your Linux desktop from your Ubuntu Touch device.",
+    "description": "Monitor and manage your Linux desktop from your Ubuntu Touch device. View system metrics, browse files, transfer files, and remotely shutdown your computer.",
     "architecture": "@CLICK_ARCH@",
     "title": "Linux Desktop Monitor",
     "hooks": {
@@ -9,7 +9,7 @@
             "desktop":  "linux-desktop-monitor.desktop"
         }
     },
-    "version": "1.0.0",
+    "version": "1.0.1",
     "maintainer": "Yomen Tohmaz <yomen.tohmaz@bluebird-documentation.com>",
     "framework" : "@CLICK_FRAMEWORK@"
 }

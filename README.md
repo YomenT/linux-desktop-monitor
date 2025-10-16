@@ -1,16 +1,21 @@
 # Linux Desktop Monitor
 
-A tool to monitor and manage your Linux desktop from your Ubuntu Touch device via SSH.
+A tool to monitor and manage your Linux desktop from your Ubuntu Touch device via a lightweight HTTP server.
 
 ## Features
 
-- 🔌 SSH connection to your Linux desktop
+- 🔌 Connect to your Linux desktop via HTTP (no SSH required!)
 - 📊 Real-time system metrics:
   - Hostname
   - Uptime
   - CPU usage
   - RAM usage
   - Temperature (if available)
+- 📁 File browser to explore your desktop files
+- ⬇️ Download files from desktop to your Ubuntu Touch device
+- ⬆️ Upload files from Ubuntu Touch to your desktop
+- ⚠️ Remote shutdown capability
+- 🔒 Optional authentication token for security
 - 🔄 Refresh metrics on demand
 - 💾 Saves connection settings
 
@@ -32,65 +37,84 @@ This will build the app and install it on your device/emulator.
 
 ### Desktop Setup
 
-Your Linux desktop needs to have SSH server running:
+Download the server script from the app's documentation or GitHub repository, then run it on your Linux desktop:
 
 ```bash
-# Install SSH server (if not already installed)
-sudo apt install openssh-server
+# Basic usage (no authentication)
+python3 desktop_monitor_server.py
 
-# Start SSH service
-sudo systemctl start sshd
-sudo systemctl enable sshd
+# With authentication token
+python3 desktop_monitor_server.py --token mysecrettoken123
 
-# Optional: Install sensors for temperature monitoring
+# Custom port
+python3 desktop_monitor_server.py --port 9090
+
+# Custom file root directory
+python3 desktop_monitor_server.py --files-root ~/Documents
+```
+
+The server will display your IP address that you'll use in the app.
+
+**Optional: Install sensors for temperature monitoring**
+```bash
 sudo apt install lm-sensors
 sudo sensors-detect
 ```
 
 ## Usage
 
-1. Open the app on your Ubuntu Touch device
-2. Enter your desktop's:
-   - Hostname or IP address
-   - SSH username
-   - SSH password
-   - Port (default: 22)
-3. Tap "Connect"
-4. View your system metrics
-5. Use "Refresh" to update the information
+1. **Start the server on your desktop**: Run `python3 desktop_monitor_server.py`
+2. **Open the app on your Ubuntu Touch device**
+3. **Enter your desktop's IP address and port** (default: 8080)
+4. **Optional**: Enter authentication token if you started the server with `--token`
+5. **Tap "Connect"** to view system metrics
+6. **Browse Files**: Explore your desktop files, download to your device
+7. **Upload Files**: Send files from your device to your desktop
+8. **Shutdown**: Remotely shutdown your desktop when needed
 
 ## Current Status
 
-**Phase 1: Basic Monitoring** ✅
-- UI for SSH connection
-- Python script for fetching metrics
-- Display system information
+**Version 1.0.0** ✅
+- ✅ System monitoring (CPU, RAM, uptime, temperature)
+- ✅ File browser with navigation
+- ✅ Download files from desktop to device
+- ✅ Upload files from device to desktop
+- ✅ Remote shutdown capability
+- ✅ Optional authentication token
+- ✅ Connection settings persistence
 
-**Phase 2: Advanced Features** (Planned)
-- Remote shutdown capability
-- File transfer between devices
+**Future Features** (Planned)
 - Multiple desktop profiles
 - Background monitoring with notifications
+- Scheduled tasks
 
 ## Development Notes
 
-This is a **QML-only app** with a Python helper script for SSH operations. The architecture:
+This app uses a **client-server architecture**:
 
-- **Frontend**: QML (similar to web development - HTML/CSS/JS)
-- **Backend**: Python script using `sshpass` for SSH
+- **Frontend**: QML + C++ (Qt5) for the Ubuntu Touch app
+- **Backend**: Python HTTP server (`desktop_monitor_server.py`) running on your desktop
+- **Communication**: HTTP/JSON API with base64 file encoding
 - **Build system**: Clickable (handles all packaging automatically)
+- **Security**: Works perfectly with Ubuntu Touch's AppArmor confinement model
 
 ## Troubleshooting
 
 **"Connection failed"**
-- Verify SSH is running on your desktop
-- Check firewall settings
-- Ensure credentials are correct
-- Try connecting from terminal: `ssh username@hostname`
+- Verify the server is running on your desktop
+- Check firewall settings (port 8080 by default must be open)
+- Ensure you entered the correct IP address
+- If using authentication, verify the token matches
 
 **"Network error"**
 - Ensure both devices are on the same network
 - Check if you can ping the desktop from your phone
+- Try accessing `http://DESKTOP_IP:8080/metrics` from a browser
+
+**"File operation error"**
+- Files can only be uploaded from the app's folder due to Ubuntu Touch permissions
+- Download a file to the app first, then you can upload it back
+- Check the debug logs for detailed error messages
 
 ## License
 

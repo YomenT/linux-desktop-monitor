@@ -28,6 +28,9 @@ MainView {
 
     width: units.gu(45)
     height: units.gu(75)
+    
+    // Use app-specific writable directory
+    property string downloadsPath: "/home/phablet/.local/share/" + applicationName
 
     // Settings to persist connection details
     Settings {
@@ -66,6 +69,18 @@ MainView {
                     width: parent.width
                     spacing: units.gu(2)
 
+                    // Bluebird Documentation link
+                    Label {
+                        width: parent.width
+                        textFormat: Text.RichText
+                        text: '<b>Powered by <a href="https://www.bluebird-documentation.com">Bluebird Documentation</a></b>'
+                        fontSize: "small"
+                        color: theme.palette.normal.activity
+                        horizontalAlignment: Text.AlignHCenter
+                        onLinkActivated: {
+                            Qt.openUrlExternally(link)
+                        }
+                    }
                     // Connection Form
                     Label {
                         text: i18n.tr('Desktop Server Settings')
@@ -319,6 +334,30 @@ MainView {
                             text: i18n.tr('Refresh')
                             onClicked: connectToDesktop()
                         }
+
+                        Button {
+                            width: parent.width
+                            text: i18n.tr('📁 Browse Desktop Files')
+                            color: theme.palette.normal.base
+                            enabled: systemInfo.hostname !== ""
+                            onClicked: {
+                                fileBrowser.hostAddress = hostnameField.text
+                                fileBrowser.portNumber = parseInt(portField.text) || 8080
+                                fileBrowser.currentPath = "/"
+                                fileBrowser.loadDirectory("/")
+                                pageStack.push(fileBrowserPage)
+                            }
+                        }
+
+                        Button {
+                            width: parent.width
+                            text: i18n.tr('⚠️ Shutdown Desktop')
+                            color: theme.palette.normal.negative
+                            enabled: systemInfo.hostname !== ""
+                            onClicked: {
+                                PopupUtils.open(shutdownConfirmDialog)
+                            }
+                        }
                     }
                 }
             }
@@ -389,12 +428,12 @@ MainView {
                     Label {
                         width: parent.width
                         wrapMode: Text.WordWrap
-                        text: i18n.tr('Download the server script from the project repository:')
+                        text: i18n.tr('Download the server script from our documentation:')
                     }
 
                     Rectangle {
                         width: parent.width
-                        height: downloadLabel.height + units.gu(2)
+                        height: downloadLabel.height + units.gu(4)
                         color: theme.palette.normal.foreground
                         radius: units.gu(0.5)
 
@@ -404,7 +443,7 @@ MainView {
                                 fill: parent
                                 margins: units.gu(1)
                             }
-                            text: 'github.com/bluebird-documentation/linux-desktop-monitor'
+                            text: 'https://bluebird-documentation.com/documentation/page/Linux%20Desktop%20Monitor/NGzFPNeV9GY1g6q2PFX7SfQmRqw1/'
                             wrapMode: Text.Wrap
                             font.family: "Ubuntu Mono"
                             color: theme.palette.normal.foregroundText
@@ -556,24 +595,9 @@ MainView {
                         }
                     }
 
-                    Rectangle {
+                    Item {
                         width: parent.width
-                        height: commandLabel4.height + units.gu(2)
-                        color: theme.palette.normal.foreground
-                        radius: units.gu(0.5)
-                        visible: false  // Hide SSH info since we're not using it
-
-                        Label {
-                            id: commandLabel4
-                            anchors {
-                                fill: parent
-                                margins: units.gu(1)
-                            }
-                            text: 'ssh username@desktop-ip'
-                            wrapMode: Text.Wrap
-                            font.family: "Ubuntu Mono"
-                            color: theme.palette.normal.foregroundText
-                        }
+                        height: units.gu(5)
                     }
 
                     Button {
@@ -581,6 +605,388 @@ MainView {
                         text: i18n.tr('Got it! Back to Connection')
                         color: theme.palette.normal.positive
                         onClicked: pageStack.pop()
+                    }
+                }
+            }
+        }
+
+        // File Browser Page
+        Page {
+            id: fileBrowserPage
+            visible: false
+            
+            header: PageHeader {
+                id: fileBrowserHeader
+                title: i18n.tr('File Browser')
+                
+                trailingActionBar.actions: [
+                    Action {
+                        iconName: "add"
+                        text: i18n.tr("Upload File")
+                        onTriggered: PopupUtils.open(uploadDialog)
+                    },
+                    Action {
+                        iconName: "close"
+                        text: i18n.tr("Close")
+                        onTriggered: pageStack.pop()
+                    }
+                ]
+            }
+
+            QtObject {
+                id: fileBrowser
+                property string hostAddress: ""
+                property int portNumber: 8080
+                property string currentPath: "/"
+                property var fileItems: []
+                property string parentPath: null
+                property bool loading: false
+
+                function loadDirectory(path) {
+                    loading = true
+                    fileItems = []
+                    sshManager.listFiles(hostAddress, portNumber, path)
+                }
+            }
+
+            Flickable {
+                anchors {
+                    top: fileBrowserHeader.bottom
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                }
+                contentHeight: fileBrowserColumn.height
+                clip: true
+
+                Column {
+                    id: fileBrowserColumn
+                    width: parent.width
+
+                    // Current path indicator
+                    Rectangle {
+                        width: parent.width
+                        height: pathLabel.height + units.gu(2)
+                        color: theme.palette.normal.background
+
+                        Label {
+                            id: pathLabel
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                verticalCenter: parent.verticalCenter
+                                margins: units.gu(2)
+                            }
+                            text: i18n.tr("Path: ") + fileBrowser.currentPath
+                            wrapMode: Text.WordWrap
+                            fontSize: "small"
+                        }
+                    }
+
+                    // Loading indicator
+                    ActivityIndicator {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        running: fileBrowser.loading
+                        visible: fileBrowser.loading
+                    }
+
+                    // Parent directory button
+                    ListItem {
+                        visible: fileBrowser.parentPath !== null && !fileBrowser.loading
+                        height: units.gu(6)
+                        
+                        leadingActions: ListItemActions {
+                            actions: [
+                                Action {
+                                    iconName: "back"
+                                }
+                            ]
+                        }
+
+                        Label {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                verticalCenter: parent.verticalCenter
+                                leftMargin: units.gu(2)
+                                rightMargin: units.gu(2)
+                            }
+                            text: i18n.tr(".. (Parent Directory)")
+                            color: theme.palette.normal.activity
+                        }
+
+                        onClicked: {
+                            if (fileBrowser.parentPath) {
+                                fileBrowser.currentPath = fileBrowser.parentPath
+                                fileBrowser.loadDirectory(fileBrowser.parentPath)
+                            }
+                        }
+                    }
+
+                    // File list
+                    Repeater {
+                        model: fileBrowser.fileItems
+                        delegate: ListItem {
+                            height: units.gu(7)
+                            
+                            leadingActions: ListItemActions {
+                                actions: [
+                                    Action {
+                                        iconName: modelData.is_dir ? "folder" : "document"
+                                    }
+                                ]
+                            }
+
+                            Column {
+                                anchors {
+                                    left: parent.left
+                                    right: parent.right
+                                    verticalCenter: parent.verticalCenter
+                                    leftMargin: units.gu(2)
+                                    rightMargin: units.gu(2)
+                                }
+                                spacing: units.gu(0.5)
+
+                                Label {
+                                    text: modelData.name
+                                    font.bold: modelData.is_dir
+                                }
+
+                                Label {
+                                    visible: !modelData.is_dir
+                                    text: formatFileSize(modelData.size)
+                                    fontSize: "small"
+                                    color: theme.palette.normal.backgroundSecondaryText
+                                }
+                            }
+
+                            onClicked: {
+                                if (modelData.is_dir) {
+                                    // Navigate into directory
+                                    var newPath = fileBrowser.currentPath === "/" 
+                                        ? "/" + modelData.name 
+                                        : fileBrowser.currentPath + "/" + modelData.name
+                                    fileBrowser.currentPath = newPath
+                                    fileBrowser.loadDirectory(newPath)
+                                } else {
+                                    // File clicked - show download option
+                                    var filePath = fileBrowser.currentPath === "/" 
+                                        ? "/" + modelData.name 
+                                        : fileBrowser.currentPath + "/" + modelData.name
+                                    PopupUtils.open(downloadDialog, null, {
+                                        fileName: modelData.name,
+                                        filePath: filePath
+                                    })
+                                }
+                            }
+                        }
+                    }
+
+                    // Empty state
+                    Label {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        visible: fileBrowser.fileItems.length === 0 && !fileBrowser.loading
+                        text: i18n.tr("No files in this directory")
+                        color: theme.palette.normal.backgroundSecondaryText
+                    }
+                }
+            }
+        }
+
+        // Download confirmation dialog
+        Component {
+            id: downloadDialog
+            Dialog {
+                id: dlg
+                property string fileName: ""
+                property string filePath: ""
+                
+                title: i18n.tr("Download File")
+                
+                Column {
+                    width: parent.width
+                    spacing: units.gu(2)
+                    
+                    Label {
+                        width: parent.width
+                        text: i18n.tr("File: ") + dlg.fileName
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    }
+                    
+                    Label {
+                        width: parent.width
+                        text: i18n.tr("Save to:")
+                        fontSize: "small"
+                    }
+                    
+                    TextField {
+                        id: savePathField
+                        width: parent.width
+                        text: root.downloadsPath + "/" + dlg.fileName
+                        placeholderText: i18n.tr("Enter destination path")
+                    }
+                    
+                    Label {
+                        width: parent.width
+                        text: i18n.tr("Files save to app folder by default.\n\nAccess downloaded files:\n1. Open File Manager\n2. Navigate to: .local/share/linux-desktop-monitor.../\n\nOr copy path from logs after download.")
+                        fontSize: "x-small"
+                        color: theme.palette.normal.backgroundSecondaryText
+                        wrapMode: Text.WordWrap
+                    }
+                }
+                
+                Button {
+                    text: i18n.tr("Cancel")
+                    onClicked: PopupUtils.close(dlg)
+                }
+                
+                Button {
+                    text: i18n.tr("Download")
+                    color: theme.palette.normal.positive
+                    onClicked: {
+                        var savePath = savePathField.text.trim()
+                        if (savePath === "") {
+                            savePath = "/home/phablet/Documents/" + dlg.fileName
+                        }
+                        PopupUtils.close(dlg)
+                        addLog("Downloading " + dlg.fileName + " to " + savePath, "info")
+                        sshManager.downloadFile(fileBrowser.hostAddress, fileBrowser.portNumber, dlg.filePath, savePath)
+                    }
+                }
+            }
+        }
+
+        // Upload dialog
+        Component {
+            id: uploadDialog
+            Dialog {
+                id: uploadDlg
+                
+                title: i18n.tr("Upload File to Desktop")
+                
+                Column {
+                    width: parent.width
+                    spacing: units.gu(2)
+                    
+                    Label {
+                        width: parent.width
+                        text: i18n.tr("Destination on Desktop:")
+                        fontSize: "medium"
+                        font.bold: true
+                    }
+                    
+                    // Label {
+                    //     width: parent.width
+                    //     text: fileBrowser.currentPath
+                    //     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    //     fontSize: "small"
+                    //     color: theme.palette.normal.backgroundSecondaryText
+                    // }
+                    
+                    Label {
+                        width: parent.width
+                        text: i18n.tr("ℹ️ The file will be uploaded to the folder shown above on your desktop where the server is running.")
+                        fontSize: "x-small"
+                        color: theme.palette.normal.backgroundTertiaryText
+                        wrapMode: Text.WordWrap
+                    }
+                    
+                    Rectangle {
+                        width: parent.width
+                        height: units.gu(0.1)
+                        color: theme.palette.normal.base
+                    }
+                    
+                    Label {
+                        width: parent.width
+                        text: i18n.tr("File path on your phone:")
+                        fontSize: "small"
+                    }
+                    
+                    TextField {
+                        id: uploadPathField
+                        width: parent.width
+                        placeholderText: "e.g., myfile.pdf or full path"
+                        text: ""
+                        inputMethodHints: Qt.ImhNoPredictiveText
+                        onTextChanged: {
+                            console.log("=== TextField onTextChanged ===")
+                            console.log("text property:", text)
+                            console.log("displayText:", displayText)
+                            console.log("text.length:", text.length)
+                            for (var i = 0; i < text.length; i++) {
+                                console.log("  char[" + i + "]:", text.charAt(i), "code:", text.charCodeAt(i))
+                            }
+                        }
+                    }
+                    
+                    Label {
+                        width: parent.width
+                        text: "App folder: " + root.downloadsPath + "/\n\nJust enter the filename (e.g., 'document.pdf') if it's in the app folder.\n\nOr enter a full path like:\n" + root.downloadsPath + "/myfile.pdf"
+                        fontSize: "x-small"
+                        color: theme.palette.normal.backgroundSecondaryText
+                        wrapMode: Text.WordWrap
+                    }
+                    
+                    Label {
+                        width: parent.width
+                        text: "⚠️ Note: Due to app permissions, you may only be able to upload files from the app's folder. To upload other files, first save/copy them to the app folder."
+                        fontSize: "x-small"
+                        color: theme.palette.normal.negative
+                        wrapMode: Text.WordWrap
+                    }
+                }
+                
+                Button {
+                    text: i18n.tr("Cancel")
+                    onClicked: PopupUtils.close(uploadDlg)
+                }
+                
+                Button {
+                    text: i18n.tr("Upload")
+                    color: theme.palette.normal.positive
+                    onClicked: {
+                        console.log("=== Upload Button Clicked ===")
+                        console.log("uploadPathField.text:", uploadPathField.text)
+                        console.log("uploadPathField.displayText:", uploadPathField.displayText)
+                        console.log("uploadPathField.text type:", typeof uploadPathField.text)
+                        
+                        var localPath = uploadPathField.text.trim()
+                        console.log("After trim:", localPath)
+                        console.log("After trim length:", localPath.length)
+                        
+                        // Print each character
+                        for (var i = 0; i < localPath.length; i++) {
+                            console.log("  localPath[" + i + "]:", localPath.charAt(i), "code:", localPath.charCodeAt(i))
+                        }
+                        
+                        if (localPath === "") {
+                            addLog("Please enter a file path", "error")
+                            return
+                        }
+                        
+                        // If it's just a filename (no path separator), assume it's in the app folder
+                        if (localPath.indexOf("/") === -1) {
+                            console.log("No slash found, prepending app path")
+                            localPath = root.downloadsPath + "/" + localPath
+                        }
+                        // If it starts with ~, expand it
+                        else if (localPath.indexOf("~/") === 0) {
+                            console.log("Expanding ~ path")
+                            localPath = localPath.replace("~/", "/home/phablet/")
+                        }
+                        
+                        console.log("=== Final Path ===")
+                        console.log("Final upload path:", localPath)
+                        console.log("Final path length:", localPath.length)
+                        for (var j = 0; j < localPath.length; j++) {
+                            console.log("  finalPath[" + j + "]:", localPath.charAt(j), "code:", localPath.charCodeAt(j))
+                        }
+                        
+                        addLog("Uploading from: " + localPath, "info")
+                        
+                        PopupUtils.close(uploadDlg)
+                        sshManager.uploadFile(fileBrowser.hostAddress, fileBrowser.portNumber, localPath, fileBrowser.currentPath)
                     }
                 }
             }
@@ -650,6 +1056,63 @@ MainView {
             statusLabel.color = theme.palette.normal.negative
             infoColumn.visible = false
         }
+        
+        onShutdownResult: {
+            console.log("QML: onShutdownResult called!")
+            console.log("QML: success:", success, "message:", message)
+            
+            if (success) {
+                addLog("Shutdown command sent successfully: " + message, "success")
+                statusLabel.text = i18n.tr('Desktop shutdown initiated')
+                statusLabel.color = theme.palette.normal.activity
+            } else {
+                addLog("Shutdown failed: " + message, "error")
+                statusLabel.text = i18n.tr('Shutdown failed: ') + message
+                statusLabel.color = theme.palette.normal.negative
+            }
+        }
+        
+        onFileListResult: {
+            console.log("QML: onFileListResult called!")
+            fileBrowser.loading = false
+            fileBrowser.fileItems = result.items || []
+            fileBrowser.parentPath = result.parent
+            addLog("Loaded " + fileBrowser.fileItems.length + " items from " + result.path, "info")
+        }
+        
+        onDownloadComplete: {
+            console.log("QML: File downloaded:", filename, "to", savePath)
+            addLog("Download complete: " + filename, "success")
+            statusLabel.text = i18n.tr('Downloaded: ') + filename
+            statusLabel.color = theme.palette.normal.positive
+        }
+        
+        onDownloadProgress: {
+            console.log("QML: Download progress:", filename, progress + "%")
+            if (progress % 25 === 0) {  // Log every 25%
+                addLog("Downloading " + filename + ": " + progress + "%", "info")
+            }
+        }
+        
+        onUploadComplete: {
+            console.log("QML: File uploaded:", filename)
+            addLog("Upload complete: " + filename, "success")
+            statusLabel.text = i18n.tr('Uploaded: ') + filename
+            statusLabel.color = theme.palette.normal.positive
+        }
+        
+        onUploadProgress: {
+            console.log("QML: Upload progress:", filename, progress + "%")
+            if (progress % 25 === 0) {  // Log every 25%
+                addLog("Uploading " + filename + ": " + progress + "%", "info")
+            }
+        }
+        
+        onFileError: {
+            console.log("QML: File error:", error)
+            addLog("File operation error: " + error, "error")
+            fileBrowser.loading = false
+        }
     }
 
     function connectToDesktop() {
@@ -683,6 +1146,51 @@ MainView {
             connectActivity.running = false
             addLog("Connection error: " + e, "error")
             console.log("Connection error:", e)
+        }
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return "0 B"
+        var k = 1024
+        var sizes = ["B", "KB", "MB", "GB", "TB"]
+        var i = Math.floor(Math.log(bytes) / Math.log(k))
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+    }
+
+    function shutdownDesktop() {
+        addLog("Sending shutdown command to " + hostnameField.text, "info")
+        var port = parseInt(portField.text) || 8080
+        
+        try {
+            sshManager.shutdownDesktop(hostnameField.text, port)
+        } catch (e) {
+            addLog("Shutdown error: " + e, "error")
+            console.log("Shutdown error:", e)
+        }
+    }
+
+    // Shutdown confirmation dialog
+    Component {
+        id: shutdownConfirmDialog
+        Dialog {
+            id: confirmDialog
+            title: i18n.tr("Shutdown Desktop?")
+            text: i18n.tr("This will shutdown your desktop computer ") + systemInfo.hostname + 
+                  i18n.tr(". Are you sure?")
+            
+            Button {
+                text: i18n.tr("Cancel")
+                onClicked: PopupUtils.close(confirmDialog)
+            }
+            
+            Button {
+                text: i18n.tr("Shutdown")
+                color: theme.palette.normal.negative
+                onClicked: {
+                    PopupUtils.close(confirmDialog)
+                    shutdownDesktop()
+                }
+            }
         }
     }
 }

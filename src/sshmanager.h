@@ -21,10 +21,23 @@ public:
                                    const QString &username, 
                                    const QString &password, 
                                    int port = 8080);
+    
+    Q_INVOKABLE void shutdownDesktop(const QString &host, int port = 8080);
+    
+    Q_INVOKABLE void listFiles(const QString &host, int port, const QString &path);
+    Q_INVOKABLE void downloadFile(const QString &host, int port, const QString &path, const QString &savePath);
+    Q_INVOKABLE void uploadFile(const QString &host, int port, const QString &localPath, const QString &remotePath);
 
 signals:
     void connectionResult(const QVariantMap &result);
     void errorOccurred(const QString &error);
+    void shutdownResult(bool success, const QString &message);
+    void fileListResult(const QVariantMap &result);
+    void downloadProgress(const QString &filename, int progress);
+    void downloadComplete(const QString &filename, const QString &savePath);
+    void uploadProgress(const QString &filename, int progress);
+    void uploadComplete(const QString &filename);
+    void fileError(const QString &error);
 
 private slots:
     void onNetworkReply(QNetworkReply *reply);

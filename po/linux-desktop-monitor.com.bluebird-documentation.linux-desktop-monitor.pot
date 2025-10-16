@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: linux-desktop-monitor.com.bluebird-documentation.linux-"
 "desktop-monitor\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-15 20:52+0000\n"
+"POT-Creation-Date: 2025-10-16 15:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,166 +18,283 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../qml/Main.qml:51
+#: ../qml/Main.qml:54
 msgid "Connect to Desktop"
 msgstr ""
 
-#: ../qml/Main.qml:71
+#: ../qml/Main.qml:86
 msgid "Desktop Server Settings"
 msgstr ""
 
-#: ../qml/Main.qml:79
+#: ../qml/Main.qml:94
 msgid ""
 "First, start the server on your desktop:\n"
 "python3 desktop_monitor_server.py"
 msgstr ""
 
-#: ../qml/Main.qml:87
+#: ../qml/Main.qml:102
 msgid "Desktop IP address (e.g., 192.168.1.100)"
 msgstr ""
 
-#: ../qml/Main.qml:95
+#: ../qml/Main.qml:110
 msgid "Auth Token (optional)"
 msgstr ""
 
-#: ../qml/Main.qml:104
+#: ../qml/Main.qml:119
 msgid "Auth Token (optional, leave empty if not set)"
 msgstr ""
 
-#: ../qml/Main.qml:111
+#: ../qml/Main.qml:126
 msgid "Port (default: 8080)"
 msgstr ""
 
-#: ../qml/Main.qml:118
+#: ../qml/Main.qml:133
 msgid "📖 Setup Instructions"
 msgstr ""
 
-#: ../qml/Main.qml:125
+#: ../qml/Main.qml:140
 msgid "Connect"
 msgstr ""
 
-#: ../qml/Main.qml:179
+#: ../qml/Main.qml:194
 msgid "Debug Logs"
 msgstr ""
 
-#: ../qml/Main.qml:185
+#: ../qml/Main.qml:200
 msgid "Clear"
 msgstr ""
 
-#: ../qml/Main.qml:236
+#: ../qml/Main.qml:251
 msgid "System Information"
 msgstr ""
 
-#: ../qml/Main.qml:251
+#: ../qml/Main.qml:266
 msgid "Hostname: "
 msgstr ""
 
-#: ../qml/Main.qml:266
+#: ../qml/Main.qml:281
 msgid "Uptime: "
 msgstr ""
 
-#: ../qml/Main.qml:281
+#: ../qml/Main.qml:296
 msgid "CPU Usage: "
 msgstr ""
 
-#: ../qml/Main.qml:296
+#: ../qml/Main.qml:311
 msgid "RAM Usage: "
 msgstr ""
 
-#: ../qml/Main.qml:312
+#: ../qml/Main.qml:327
 msgid "Temperature: "
 msgstr ""
 
-#: ../qml/Main.qml:319
+#: ../qml/Main.qml:334
 msgid "Refresh"
 msgstr ""
 
-#: ../qml/Main.qml:334
+#: ../qml/Main.qml:340
+msgid "📁 Browse Desktop Files"
+msgstr ""
+
+#: ../qml/Main.qml:354
+msgid "⚠️ Shutdown Desktop"
+msgstr ""
+
+#: ../qml/Main.qml:373
 msgid "Setup Guide"
 msgstr ""
 
-#: ../qml/Main.qml:339
+#: ../qml/Main.qml:378 ../qml/Main.qml:630
 msgid "Close"
 msgstr ""
 
-#: ../qml/Main.qml:363
+#: ../qml/Main.qml:402
 msgid "How It Works"
 msgstr ""
 
-#: ../qml/Main.qml:371
+#: ../qml/Main.qml:410
 msgid ""
 "This app connects to a simple web server running on your desktop. The server "
 "gathers system metrics and provides them via HTTP, which works perfectly "
 "with Ubuntu Touch's security model."
 msgstr ""
 
-#: ../qml/Main.qml:384
+#: ../qml/Main.qml:423
 msgid "Step 1: Download Server Script"
 msgstr ""
 
-#: ../qml/Main.qml:392
-msgid "Download the server script from the project repository:"
+#: ../qml/Main.qml:431
+msgid "Download the server script from our documentation:"
 msgstr ""
 
-#: ../qml/Main.qml:417
+#: ../qml/Main.qml:456
 msgid ""
 "Or the script is included in the app source code as desktop_monitor_server.py"
 msgstr ""
 
-#: ../qml/Main.qml:428
+#: ../qml/Main.qml:467
 msgid "Step 2: Start Server on Desktop"
 msgstr ""
 
-#: ../qml/Main.qml:436
+#: ../qml/Main.qml:475
 msgid "On your Linux desktop, run:"
 msgstr ""
 
-#: ../qml/Main.qml:461
+#: ../qml/Main.qml:500
 msgid "The server will start on port 8080 and display your IP address."
 msgstr ""
 
-#: ../qml/Main.qml:472
+#: ../qml/Main.qml:511
 msgid "Step 3: Connect from App"
 msgstr ""
 
-#: ../qml/Main.qml:480
+#: ../qml/Main.qml:519
 msgid "Enter your desktop's IP address in the app and click Connect!"
 msgstr ""
 
-#: ../qml/Main.qml:491
+#: ../qml/Main.qml:530
 msgid "Optional: Security Token"
 msgstr ""
 
-#: ../qml/Main.qml:499
+#: ../qml/Main.qml:538
 msgid "For added security, you can start the server with a token:"
 msgstr ""
 
-#: ../qml/Main.qml:524
+#: ../qml/Main.qml:563
 msgid "Then enter the same token in the Auth Token field in the app."
 msgstr ""
 
-#: ../qml/Main.qml:535
+#: ../qml/Main.qml:574
 msgid "Advanced Options"
 msgstr ""
 
-#: ../qml/Main.qml:581
+#: ../qml/Main.qml:605
 msgid "Got it! Back to Connection"
 msgstr ""
 
-#: ../qml/Main.qml:639
+#: ../qml/Main.qml:620
+msgid "File Browser"
+msgstr ""
+
+#: ../qml/Main.qml:625
+msgid "Upload File"
+msgstr ""
+
+#: ../qml/Main.qml:680
+msgid "Path: "
+msgstr ""
+
+#: ../qml/Main.qml:714
+msgid ".. (Parent Directory)"
+msgstr ""
+
+#: ../qml/Main.qml:789
+msgid "No files in this directory"
+msgstr ""
+
+#: ../qml/Main.qml:804
+msgid "Download File"
+msgstr ""
+
+#: ../qml/Main.qml:812
+msgid "File: "
+msgstr ""
+
+#: ../qml/Main.qml:818
+msgid "Save to:"
+msgstr ""
+
+#: ../qml/Main.qml:826
+msgid "Enter destination path"
+msgstr ""
+
+#: ../qml/Main.qml:831
+msgid ""
+"Files save to app folder by default.\n"
+"\n"
+"Access downloaded files:\n"
+"1. Open File Manager\n"
+"2. Navigate to: .local/share/linux-desktop-monitor.../\n"
+"\n"
+"Or copy path from logs after download."
+msgstr ""
+
+#: ../qml/Main.qml:839 ../qml/Main.qml:941 ../qml/Main.qml:1182
+msgid "Cancel"
+msgstr ""
+
+#: ../qml/Main.qml:844
+msgid "Download"
+msgstr ""
+
+#: ../qml/Main.qml:865
+msgid "Upload File to Desktop"
+msgstr ""
+
+#: ../qml/Main.qml:873
+msgid "Destination on Desktop:"
+msgstr ""
+
+#: ../qml/Main.qml:888
+msgid ""
+"ℹ️ The file will be uploaded to the folder shown above on your desktop where "
+"the server is running."
+msgstr ""
+
+#: ../qml/Main.qml:902
+msgid "File path on your phone:"
+msgstr ""
+
+#: ../qml/Main.qml:946
+msgid "Upload"
+msgstr ""
+
+#: ../qml/Main.qml:1045
 msgid "Connected successfully!"
 msgstr ""
 
-#: ../qml/Main.qml:649
+#: ../qml/Main.qml:1055
 msgid "Error: "
 msgstr ""
 
-#: ../qml/Main.qml:657
+#: ../qml/Main.qml:1066
+msgid "Desktop shutdown initiated"
+msgstr ""
+
+#: ../qml/Main.qml:1070
+msgid "Shutdown failed: "
+msgstr ""
+
+#: ../qml/Main.qml:1086
+msgid "Downloaded: "
+msgstr ""
+
+#: ../qml/Main.qml:1100
+msgid "Uploaded: "
+msgstr ""
+
+#: ../qml/Main.qml:1120
 msgid "Connecting..."
 msgstr ""
 
-#: ../qml/Main.qml:681
+#: ../qml/Main.qml:1144
 msgid "Error: Connection manager not available - "
+msgstr ""
+
+#: ../qml/Main.qml:1177
+msgid "Shutdown Desktop?"
+msgstr ""
+
+#: ../qml/Main.qml:1178
+msgid "This will shutdown your desktop computer "
+msgstr ""
+
+#: ../qml/Main.qml:1179
+msgid ". Are you sure?"
+msgstr ""
+
+#: ../qml/Main.qml:1187
+msgid "Shutdown"
 msgstr ""
 
 #: linux-desktop-monitor.desktop.in.h:1
