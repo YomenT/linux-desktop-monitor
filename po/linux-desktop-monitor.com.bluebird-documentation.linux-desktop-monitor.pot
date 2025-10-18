@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: linux-desktop-monitor.com.bluebird-documentation.linux-"
 "desktop-monitor\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-16 15:36+0000\n"
+"POT-Creation-Date: 2025-10-18 23:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -88,7 +88,7 @@ msgstr ""
 msgid "Temperature: "
 msgstr ""
 
-#: ../qml/Main.qml:334
+#: ../qml/Main.qml:334 ../qml/Main.qml:820
 msgid "Refresh"
 msgstr ""
 
@@ -97,118 +97,138 @@ msgid "📁 Browse Desktop Files"
 msgstr ""
 
 #: ../qml/Main.qml:354
+msgid "🖥️ Remote Desktop"
+msgstr ""
+
+#: ../qml/Main.qml:366
 msgid "⚠️ Shutdown Desktop"
 msgstr ""
 
-#: ../qml/Main.qml:373
+#: ../qml/Main.qml:385
 msgid "Setup Guide"
 msgstr ""
 
-#: ../qml/Main.qml:378 ../qml/Main.qml:630
+#: ../qml/Main.qml:390 ../qml/Main.qml:642 ../qml/Main.qml:825
 msgid "Close"
 msgstr ""
 
-#: ../qml/Main.qml:402
+#: ../qml/Main.qml:414
 msgid "How It Works"
 msgstr ""
 
-#: ../qml/Main.qml:410
+#: ../qml/Main.qml:422
 msgid ""
 "This app connects to a simple web server running on your desktop. The server "
 "gathers system metrics and provides them via HTTP, which works perfectly "
 "with Ubuntu Touch's security model."
 msgstr ""
 
-#: ../qml/Main.qml:423
+#: ../qml/Main.qml:435
 msgid "Step 1: Download Server Script"
 msgstr ""
 
-#: ../qml/Main.qml:431
+#: ../qml/Main.qml:443
 msgid "Download the server script from our documentation:"
 msgstr ""
 
-#: ../qml/Main.qml:456
+#: ../qml/Main.qml:468
 msgid ""
 "Or the script is included in the app source code as desktop_monitor_server.py"
 msgstr ""
 
-#: ../qml/Main.qml:467
+#: ../qml/Main.qml:479
 msgid "Step 2: Start Server on Desktop"
 msgstr ""
 
-#: ../qml/Main.qml:475
+#: ../qml/Main.qml:487
 msgid "On your Linux desktop, run:"
 msgstr ""
 
-#: ../qml/Main.qml:500
+#: ../qml/Main.qml:512
 msgid "The server will start on port 8080 and display your IP address."
 msgstr ""
 
-#: ../qml/Main.qml:511
+#: ../qml/Main.qml:523
 msgid "Step 3: Connect from App"
 msgstr ""
 
-#: ../qml/Main.qml:519
+#: ../qml/Main.qml:531
 msgid "Enter your desktop's IP address in the app and click Connect!"
 msgstr ""
 
-#: ../qml/Main.qml:530
+#: ../qml/Main.qml:542
 msgid "Optional: Security Token"
 msgstr ""
 
-#: ../qml/Main.qml:538
+#: ../qml/Main.qml:550
 msgid "For added security, you can start the server with a token:"
 msgstr ""
 
-#: ../qml/Main.qml:563
+#: ../qml/Main.qml:575
 msgid "Then enter the same token in the Auth Token field in the app."
 msgstr ""
 
-#: ../qml/Main.qml:574
+#: ../qml/Main.qml:586
 msgid "Advanced Options"
 msgstr ""
 
-#: ../qml/Main.qml:605
+#: ../qml/Main.qml:617
 msgid "Got it! Back to Connection"
 msgstr ""
 
-#: ../qml/Main.qml:620
+#: ../qml/Main.qml:632
 msgid "File Browser"
 msgstr ""
 
-#: ../qml/Main.qml:625
+#: ../qml/Main.qml:637
 msgid "Upload File"
 msgstr ""
 
-#: ../qml/Main.qml:680
+#: ../qml/Main.qml:692
 msgid "Path: "
 msgstr ""
 
-#: ../qml/Main.qml:714
+#: ../qml/Main.qml:726
 msgid ".. (Parent Directory)"
 msgstr ""
 
-#: ../qml/Main.qml:789
+#: ../qml/Main.qml:801
 msgid "No files in this directory"
 msgstr ""
 
-#: ../qml/Main.qml:804
+#: ../qml/Main.qml:815
+msgid "Remote Desktop"
+msgstr ""
+
+#: ../qml/Main.qml:863
+msgid "View your desktop screen. Tap the refresh button to update."
+msgstr ""
+
+#: ../qml/Main.qml:898
+msgid "Tap refresh to capture desktop screen"
+msgstr ""
+
+#: ../qml/Main.qml:965
+msgid "Refresh Screenshot"
+msgstr ""
+
+#: ../qml/Main.qml:986
 msgid "Download File"
 msgstr ""
 
-#: ../qml/Main.qml:812
+#: ../qml/Main.qml:994
 msgid "File: "
 msgstr ""
 
-#: ../qml/Main.qml:818
+#: ../qml/Main.qml:1000
 msgid "Save to:"
 msgstr ""
 
-#: ../qml/Main.qml:826
+#: ../qml/Main.qml:1008
 msgid "Enter destination path"
 msgstr ""
 
-#: ../qml/Main.qml:831
+#: ../qml/Main.qml:1013
 msgid ""
 "Files save to app folder by default.\n"
 "\n"
@@ -219,81 +239,81 @@ msgid ""
 "Or copy path from logs after download."
 msgstr ""
 
-#: ../qml/Main.qml:839 ../qml/Main.qml:941 ../qml/Main.qml:1182
+#: ../qml/Main.qml:1021 ../qml/Main.qml:1123 ../qml/Main.qml:1394
 msgid "Cancel"
 msgstr ""
 
-#: ../qml/Main.qml:844
+#: ../qml/Main.qml:1026
 msgid "Download"
 msgstr ""
 
-#: ../qml/Main.qml:865
+#: ../qml/Main.qml:1047
 msgid "Upload File to Desktop"
 msgstr ""
 
-#: ../qml/Main.qml:873
+#: ../qml/Main.qml:1055
 msgid "Destination on Desktop:"
 msgstr ""
 
-#: ../qml/Main.qml:888
+#: ../qml/Main.qml:1070
 msgid ""
 "ℹ️ The file will be uploaded to the folder shown above on your desktop where "
 "the server is running."
 msgstr ""
 
-#: ../qml/Main.qml:902
+#: ../qml/Main.qml:1084
 msgid "File path on your phone:"
 msgstr ""
 
-#: ../qml/Main.qml:946
+#: ../qml/Main.qml:1128
 msgid "Upload"
 msgstr ""
 
-#: ../qml/Main.qml:1045
+#: ../qml/Main.qml:1227
 msgid "Connected successfully!"
 msgstr ""
 
-#: ../qml/Main.qml:1055
+#: ../qml/Main.qml:1237
 msgid "Error: "
 msgstr ""
 
-#: ../qml/Main.qml:1066
+#: ../qml/Main.qml:1248
 msgid "Desktop shutdown initiated"
 msgstr ""
 
-#: ../qml/Main.qml:1070
+#: ../qml/Main.qml:1252
 msgid "Shutdown failed: "
 msgstr ""
 
-#: ../qml/Main.qml:1086
+#: ../qml/Main.qml:1268
 msgid "Downloaded: "
 msgstr ""
 
-#: ../qml/Main.qml:1100
+#: ../qml/Main.qml:1282
 msgid "Uploaded: "
 msgstr ""
 
-#: ../qml/Main.qml:1120
+#: ../qml/Main.qml:1332
 msgid "Connecting..."
 msgstr ""
 
-#: ../qml/Main.qml:1144
+#: ../qml/Main.qml:1356
 msgid "Error: Connection manager not available - "
 msgstr ""
 
-#: ../qml/Main.qml:1177
+#: ../qml/Main.qml:1389
 msgid "Shutdown Desktop?"
 msgstr ""
 
-#: ../qml/Main.qml:1178
+#: ../qml/Main.qml:1390
 msgid "This will shutdown your desktop computer "
 msgstr ""
 
-#: ../qml/Main.qml:1179
+#: ../qml/Main.qml:1391
 msgid ". Are you sure?"
 msgstr ""
 
-#: ../qml/Main.qml:1187
+#: ../qml/Main.qml:1399
 msgid "Shutdown"
 msgstr ""
 

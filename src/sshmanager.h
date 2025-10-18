@@ -27,6 +27,9 @@ public:
     Q_INVOKABLE void listFiles(const QString &host, int port, const QString &path);
     Q_INVOKABLE void downloadFile(const QString &host, int port, const QString &path, const QString &savePath);
     Q_INVOKABLE void uploadFile(const QString &host, int port, const QString &localPath, const QString &remotePath);
+    Q_INVOKABLE void captureScreen(const QString &host, int port);
+    Q_INVOKABLE void sendMouseEvent(const QString &host, int port, const QString &action, int x, int y, const QString &button = "left");
+    Q_INVOKABLE void sendKeyboardInput(const QString &host, int port, const QString &text, const QString &key = "");
 
 signals:
     void connectionResult(const QVariantMap &result);
@@ -38,6 +41,9 @@ signals:
     void uploadProgress(const QString &filename, int progress);
     void uploadComplete(const QString &filename);
     void fileError(const QString &error);
+    void screenshotReady(const QString &imageData);
+    void mouseControlResult(bool success, const QString &message);
+    void keyboardInputResult(bool success, const QString &message);
 
 private slots:
     void onNetworkReply(QNetworkReply *reply);

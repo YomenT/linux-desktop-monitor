@@ -16,6 +16,9 @@ import os
 import urllib.parse
 import base64
 import mimetypes
+from PIL import ImageGrab, Image
+from io import BytesIO
+import pyautogui
 
 # Optional authentication token
 AUTH_TOKEN = None
@@ -51,6 +54,9 @@ class MonitorHandler(BaseHTTPRequestHandler):
         # Handle /files/download endpoint
         elif self.path.startswith('/files/download'):
             self.handle_download_file()
+        # Handle /desktop/screenshot endpoint
+        elif self.path == '/desktop/screenshot':
+            self.handle_screenshot()
         else:
             self.send_response(404)
             self.send_header('Content-Type', 'application/json')
@@ -65,6 +71,12 @@ class MonitorHandler(BaseHTTPRequestHandler):
         # Handle /files/upload endpoint
         if self.path.startswith('/files/upload'):
             self.handle_upload_file()
+        # Handle /desktop/mouse endpoint
+        elif self.path == '/desktop/mouse':
+            self.handle_mouse_control()
+        # Handle /desktop/keyboard endpoint
+        elif self.path == '/desktop/keyboard':
+            self.handle_keyboard_input()
         else:
             self.send_response(404)
             self.send_header('Content-Type', 'application/json')
@@ -329,6 +341,137 @@ class MonitorHandler(BaseHTTPRequestHandler):
                 'message': 'File uploaded successfully',
                 'path': os.path.relpath(target_path, FILES_ROOT),
                 'size': len(file_data)
+            }).encode())
+            
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': str(e)}).encode())
+
+    def handle_screenshot(self):
+        """Capture desktop screenshot and return as base64-encoded JPEG"""
+        try:
+            # Capture the screen
+            screenshot = ImageGrab.grab()
+            
+            # Convert to JPEG for better compression
+            buffer = BytesIO()
+            # Resize to reduce bandwidth (adjust quality/size as needed)
+            # You can make this configurable via query parameters later
+            screenshot.thumbnail((1280, 720), Image.Resampling.LANCZOS)
+            screenshot.save(buffer, format='JPEG', quality=75, optimize=True)
+            
+            # Encode as base64
+            screenshot_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            
+            # Send response
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'success': True,
+                'image': screenshot_base64,
+                'format': 'jpeg',
+                'width': screenshot.width,
+                'height': screenshot.height
+            }).encode())
+            
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': str(e)}).encode())
+
+    def handle_mouse_control(self):
+        """Handle mouse control commands"""
+        try:
+            # Read request body
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length)
+            data = json.loads(body.decode('utf-8'))
+            
+            action = data.get('action')
+            x = data.get('x')
+            y = data.get('y')
+            button = data.get('button', 'left')  # left, right, middle
+            
+            if action == 'move':
+                # Move mouse to absolute position
+                pyautogui.moveTo(x, y, duration=0.1)
+                message = f"Mouse moved to ({x}, {y})"
+                
+            elif action == 'click':
+                # Click at specified position
+                pyautogui.click(x, y, button=button)
+                message = f"{button.capitalize()} clicked at ({x}, {y})"
+                
+            elif action == 'doubleclick':
+                # Double click at specified position
+                pyautogui.doubleClick(x, y)
+                message = f"Double clicked at ({x}, {y})"
+                
+            elif action == 'scroll':
+                # Scroll (y value is scroll amount)
+                pyautogui.scroll(int(y))
+                message = f"Scrolled {y} units"
+                
+            else:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'Invalid action'}).encode())
+                return
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'success': True,
+                'message': message
+            }).encode())
+            
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': str(e)}).encode())
+
+    def handle_keyboard_input(self):
+        """Handle keyboard input commands"""
+        try:
+            # Read request body
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length)
+            data = json.loads(body.decode('utf-8'))
+            
+            text = data.get('text', '')
+            key = data.get('key', '')
+            
+            if text:
+                # Type text
+                pyautogui.write(text, interval=0.05)
+                message = f"Typed: {text}"
+            elif key:
+                # Press special key (enter, backspace, etc.)
+                pyautogui.press(key)
+                message = f"Pressed key: {key}"
+            else:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'No text or key specified'}).encode())
+                return
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'success': True,
+                'message': message
             }).encode())
             
         except Exception as e:

@@ -351,6 +351,18 @@ MainView {
 
                         Button {
                             width: parent.width
+                            text: i18n.tr('🖥️ Remote Desktop')
+                            color: theme.palette.normal.activity
+                            enabled: systemInfo.hostname !== ""
+                            onClicked: {
+                                remoteDesktop.hostAddress = hostnameField.text
+                                remoteDesktop.portNumber = parseInt(portField.text) || 8080
+                                pageStack.push(remoteDesktopPage)
+                            }
+                        }
+
+                        Button {
+                            width: parent.width
                             text: i18n.tr('⚠️ Shutdown Desktop')
                             color: theme.palette.normal.negative
                             enabled: systemInfo.hostname !== ""
@@ -793,6 +805,176 @@ MainView {
             }
         }
 
+        // Remote Desktop Page
+        Page {
+            id: remoteDesktopPage
+            visible: false
+            
+            header: PageHeader {
+                id: remoteDesktopHeader
+                title: i18n.tr('Remote Desktop')
+                
+                trailingActionBar.actions: [
+                    Action {
+                        iconName: "reload"
+                        text: i18n.tr("Refresh")
+                        onTriggered: remoteDesktop.captureDesktopScreen()
+                    },
+                    Action {
+                        iconName: "close"
+                        text: i18n.tr("Close")
+                        onTriggered: pageStack.pop()
+                    }
+                ]
+            }
+
+            QtObject {
+                id: remoteDesktop
+                property string hostAddress: ""
+                property int portNumber: 8080
+                property string currentImageData: ""
+                property bool loading: false
+
+                function captureDesktopScreen() {
+                    loading = true
+                    sshManager.captureScreen(hostAddress, portNumber)
+                }
+            }
+
+            Flickable {
+                anchors {
+                    top: remoteDesktopHeader.bottom
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                }
+                contentHeight: desktopColumn.height
+                clip: true
+
+                Column {
+                    id: desktopColumn
+                    width: parent.width
+                    spacing: units.gu(2)
+
+                    // Instructions
+                    Label {
+                        width: parent.width
+                        anchors.margins: units.gu(2)
+                        text: i18n.tr("View your desktop screen. Tap the refresh button to update.")
+                        wrapMode: Text.WordWrap
+                        fontSize: "small"
+                        color: theme.palette.normal.backgroundSecondaryText
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+
+                    // Loading indicator
+                    ActivityIndicator {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        running: remoteDesktop.loading
+                        visible: remoteDesktop.loading
+                    }
+
+                    // Desktop screenshot viewer
+                    Rectangle {
+                        width: parent.width
+                        height: desktopImage.height
+                        color: theme.palette.normal.background
+
+                        Image {
+                            id: desktopImage
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            fillMode: Image.PreserveAspectFit
+                            source: remoteDesktop.currentImageData ? "data:image/jpeg;base64," + remoteDesktop.currentImageData : ""
+                            
+                            property real desktopWidth: 1280  // Will be updated from server
+                            property real desktopHeight: 720
+                            
+                            Label {
+                                anchors.centerIn: parent
+                                visible: !remoteDesktop.currentImageData && !remoteDesktop.loading
+                                text: i18n.tr("Tap refresh to capture desktop screen")
+                                color: theme.palette.normal.backgroundSecondaryText
+                            }
+                            
+                            // Mouse area for click detection
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: remoteDesktop.currentImageData !== ""
+                                
+                                onClicked: {
+                                    // Calculate actual desktop coordinates
+                                    // Account for image scaling
+                                    var scaleX = desktopImage.desktopWidth / desktopImage.paintedWidth
+                                    var scaleY = desktopImage.desktopHeight / desktopImage.paintedHeight
+                                    
+                                    // Calculate offset if image is centered
+                                    var offsetX = (desktopImage.width - desktopImage.paintedWidth) / 2
+                                    var offsetY = (desktopImage.height - desktopImage.paintedHeight) / 2
+                                    
+                                    var desktopX = Math.floor((mouse.x - offsetX) * scaleX)
+                                    var desktopY = Math.floor((mouse.y - offsetY) * scaleY)
+                                    
+                                    console.log("Click at phone coords:", mouse.x, mouse.y)
+                                    console.log("Translated to desktop coords:", desktopX, desktopY)
+                                    console.log("Scale:", scaleX, scaleY, "Offset:", offsetX, offsetY)
+                                    
+                                    // Send click to desktop
+                                    sshManager.sendMouseEvent(
+                                        remoteDesktop.hostAddress,
+                                        remoteDesktop.portNumber,
+                                        "click",
+                                        desktopX,
+                                        desktopY,
+                                        "left"
+                                    )
+                                    
+                                    addLog("Clicked at (" + desktopX + ", " + desktopY + ")", "info")
+                                }
+                                
+                                onPressAndHold: {
+                                    // Right click on long press
+                                    var scaleX = desktopImage.desktopWidth / desktopImage.paintedWidth
+                                    var scaleY = desktopImage.desktopHeight / desktopImage.paintedHeight
+                                    var offsetX = (desktopImage.width - desktopImage.paintedWidth) / 2
+                                    var offsetY = (desktopImage.height - desktopImage.paintedHeight) / 2
+                                    var desktopX = Math.floor((mouse.x - offsetX) * scaleX)
+                                    var desktopY = Math.floor((mouse.y - offsetY) * scaleY)
+                                    
+                                    sshManager.sendMouseEvent(
+                                        remoteDesktop.hostAddress,
+                                        remoteDesktop.portNumber,
+                                        "click",
+                                        desktopX,
+                                        desktopY,
+                                        "right"
+                                    )
+                                    
+                                    addLog("Right-clicked at (" + desktopX + ", " + desktopY + ")", "info")
+                                }
+                            }
+                        }
+                    }
+
+                    // Refresh Button
+                    Button {
+                        width: parent.width
+                        anchors.margins: units.gu(2)
+                        text: i18n.tr("Refresh Screenshot")
+                        color: theme.palette.normal.positive
+                        onClicked: remoteDesktop.captureDesktopScreen()
+                    }
+                }
+            }
+
+            // Auto-capture on page open
+            Component.onCompleted: {
+                remoteDesktop.captureDesktopScreen()
+            }
+        }
+
         // Download confirmation dialog
         Component {
             id: downloadDialog
@@ -1112,6 +1294,36 @@ MainView {
             console.log("QML: File error:", error)
             addLog("File operation error: " + error, "error")
             fileBrowser.loading = false
+        }
+        
+        onScreenshotReady: {
+            console.log("QML: Screenshot received, data length:", imageData.length)
+            remoteDesktop.currentImageData = imageData
+            remoteDesktop.loading = false
+            addLog("Screenshot captured successfully", "success")
+        }
+        
+        onMouseControlResult: {
+            if (success) {
+                console.log("QML: Mouse control success:", message)
+                // Auto-refresh screenshot after a short delay
+                remoteDesktop.captureDesktopScreen()
+            } else {
+                console.log("QML: Mouse control error:", message)
+                addLog("Mouse control error: " + message, "error")
+            }
+        }
+        
+        onKeyboardInputResult: {
+            if (success) {
+                console.log("QML: Keyboard input success:", message)
+                addLog(message, "success")
+                // Auto-refresh screenshot after typing
+                remoteDesktop.captureDesktopScreen()
+            } else {
+                console.log("QML: Keyboard input error:", message)
+                addLog("Keyboard error: " + message, "error")
+            }
         }
     }
 

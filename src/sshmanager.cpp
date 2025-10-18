@@ -404,3 +404,170 @@ void SSHManager::uploadFile(const QString &host, int port, const QString &localP
         emit uploadComplete(filename);
     });
 }
+
+void SSHManager::captureScreen(const QString &host, int port)
+{
+    qDebug() << "========== Screenshot Capture Request ==========";
+    qDebug() << "Host:" << host << "Port:" << port;
+    
+    // Build the URL
+    QString url = QString("http://%1:%2/desktop/screenshot").arg(host).arg(port);
+    qDebug() << "Requesting screenshot from:" << url;
+    
+    QNetworkRequest request;
+    request.setUrl(QUrl(url));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    
+    qDebug() << "Sending screenshot request...";
+    QNetworkReply *reply = m_networkManager->get(request);
+    
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        
+        if (reply->error() != QNetworkReply::NoError) {
+            qDebug() << "Screenshot error:" << reply->errorString();
+            emit fileError("Screenshot failed: " + reply->errorString());
+            return;
+        }
+        
+        QByteArray data = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        
+        if (!doc.isObject()) {
+            qDebug() << "Invalid screenshot response format";
+            emit fileError("Invalid screenshot response format");
+            return;
+        }
+        
+        QJsonObject result = doc.object();
+        if (!result.value("success").toBool()) {
+            QString error = result.value("error").toString("Screenshot failed");
+            qDebug() << "Screenshot error:" << error;
+            emit fileError(error);
+            return;
+        }
+        
+        QString imageData = result.value("image").toString();
+        qDebug() << "Screenshot received, size:" << imageData.length() << "characters (base64)";
+        
+        emit screenshotReady(imageData);
+    });
+}
+
+void SSHManager::sendMouseEvent(const QString &host, int port, const QString &action, int x, int y, const QString &button)
+{
+    qDebug() << "========== Mouse Control Request ==========";
+    qDebug() << "Host:" << host << "Port:" << port;
+    qDebug() << "Action:" << action << "Position:" << x << "," << y << "Button:" << button;
+    
+    // Build the URL
+    QString url = QString("http://%1:%2/desktop/mouse").arg(host).arg(port);
+    
+    // Build JSON body
+    QJsonObject json;
+    json["action"] = action;
+    json["x"] = x;
+    json["y"] = y;
+    json["button"] = button;
+    
+    QJsonDocument doc(json);
+    QByteArray jsonData = doc.toJson();
+    
+    QNetworkRequest request;
+    request.setUrl(QUrl(url));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    
+    qDebug() << "Sending mouse command...";
+    QNetworkReply *reply = m_networkManager->post(request, jsonData);
+    
+    connect(reply, &QNetworkReply::finished, this, [this, reply, action]() {
+        reply->deleteLater();
+        
+        if (reply->error() != QNetworkReply::NoError) {
+            qDebug() << "Mouse control error:" << reply->errorString();
+            emit mouseControlResult(false, "Mouse control failed: " + reply->errorString());
+            return;
+        }
+        
+        QByteArray data = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        
+        if (!doc.isObject()) {
+            qDebug() << "Invalid mouse control response";
+            emit mouseControlResult(false, "Invalid response format");
+            return;
+        }
+        
+        QJsonObject result = doc.object();
+        if (!result.value("success").toBool()) {
+            QString error = result.value("error").toString("Mouse control failed");
+            qDebug() << "Mouse control error:" << error;
+            emit mouseControlResult(false, error);
+            return;
+        }
+        
+        QString message = result.value("message").toString();
+        qDebug() << "Mouse control success:" << message;
+        emit mouseControlResult(true, message);
+    });
+}
+
+void SSHManager::sendKeyboardInput(const QString &host, int port, const QString &text, const QString &key)
+{
+    qDebug() << "========== Keyboard Input Request ==========";
+    qDebug() << "Host:" << host << "Port:" << port;
+    qDebug() << "Text:" << text << "Key:" << key;
+    
+    // Build the URL
+    QString url = QString("http://%1:%2/desktop/keyboard").arg(host).arg(port);
+    
+    // Build JSON body
+    QJsonObject json;
+    if (!text.isEmpty()) {
+        json["text"] = text;
+    }
+    if (!key.isEmpty()) {
+        json["key"] = key;
+    }
+    
+    QJsonDocument doc(json);
+    QByteArray jsonData = doc.toJson();
+    
+    QNetworkRequest request;
+    request.setUrl(QUrl(url));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    
+    qDebug() << "Sending keyboard input...";
+    QNetworkReply *reply = m_networkManager->post(request, jsonData);
+    
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        
+        if (reply->error() != QNetworkReply::NoError) {
+            qDebug() << "Keyboard input error:" << reply->errorString();
+            emit keyboardInputResult(false, "Keyboard input failed: " + reply->errorString());
+            return;
+        }
+        
+        QByteArray data = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        
+        if (!doc.isObject()) {
+            qDebug() << "Invalid keyboard input response";
+            emit keyboardInputResult(false, "Invalid response format");
+            return;
+        }
+        
+        QJsonObject result = doc.object();
+        if (!result.value("success").toBool()) {
+            QString error = result.value("error").toString("Keyboard input failed");
+            qDebug() << "Keyboard input error:" << error;
+            emit keyboardInputResult(false, error);
+            return;
+        }
+        
+        QString message = result.value("message").toString();
+        qDebug() << "Keyboard input success:" << message;
+        emit keyboardInputResult(true, message);
+    });
+}

@@ -40,6 +40,9 @@ This will build the app and install it on your device/emulator.
 Download the server script from the app's documentation or GitHub repository, then run it on your Linux desktop:
 
 ```bash
+# Install required dependencies
+pip3 install pillow pyautogui --break-system-packages
+
 # Basic usage (no authentication)
 python3 desktop_monitor_server.py
 
@@ -55,6 +58,8 @@ python3 desktop_monitor_server.py --files-root ~/Documents
 
 The server will display your IP address that you'll use in the app.
 
+**Note**: The `--break-system-packages` flag is required on modern Linux distributions (Python 3.11+) and is safe for these user-space libraries.
+
 **Optional: Install sensors for temperature monitoring**
 ```bash
 sudo apt install lm-sensors
@@ -63,14 +68,29 @@ sudo sensors-detect
 
 ## Usage
 
-1. **Start the server on your desktop**: Run `python3 desktop_monitor_server.py`
-2. **Open the app on your Ubuntu Touch device**
-3. **Enter your desktop's IP address and port** (default: 8080)
-4. **Optional**: Enter authentication token if you started the server with `--token`
-5. **Tap "Connect"** to view system metrics
-6. **Browse Files**: Explore your desktop files, download to your device
-7. **Upload Files**: Send files from your device to your desktop
-8. **Shutdown**: Remotely shutdown your desktop when needed
+1. **Install dependencies on your desktop**:
+   ```bash
+   pip3 install pillow pyautogui --break-system-packages
+   ```
+
+2. **Start the server on your desktop**: 
+   ```bash
+   python3 desktop_monitor_server.py
+   ```
+
+3. **Open the app on your Ubuntu Touch device**
+
+4. **Enter your desktop's IP address and port** (default: 8080)
+
+5. **Optional**: Enter authentication token if you started the server with `--token`
+
+6. **Tap "Connect"** to view system metrics
+
+7. **Browse Files**: Explore your desktop files, download to your device
+
+8. **Upload Files**: Send files from your device to your desktop
+
+9. **Shutdown**: Remotely shutdown your desktop when needed
 
 ## Current Status
 
