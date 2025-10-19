@@ -448,9 +448,13 @@ void SSHManager::captureScreen(const QString &host, int port)
         }
         
         QString imageData = result.value("image").toString();
-        qDebug() << "Screenshot received, size:" << imageData.length() << "characters (base64)";
+        int width = result.value("width").toInt();
+        int height = result.value("height").toInt();
         
-        emit screenshotReady(imageData);
+        qDebug() << "Screenshot received, size:" << imageData.length() << "characters (base64)";
+        qDebug() << "Desktop resolution:" << width << "x" << height;
+        
+        emit screenshotReady(imageData, width, height);
     });
 }
 

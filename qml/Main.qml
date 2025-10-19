@@ -834,6 +834,7 @@ MainView {
                 property int portNumber: 8080
                 property string currentImageData: ""
                 property bool loading: false
+                property real zoomLevel: 1.0
 
                 function captureDesktopScreen() {
                     loading = true
@@ -842,129 +843,326 @@ MainView {
             }
 
             Flickable {
+                id: flickable
                 anchors {
                     top: remoteDesktopHeader.bottom
                     left: parent.left
                     right: parent.right
-                    bottom: parent.bottom
+                    bottom: controlBar.top
                 }
-                contentHeight: desktopColumn.height
+                contentWidth: desktopImage.width * remoteDesktop.zoomLevel
+                contentHeight: desktopImage.height * remoteDesktop.zoomLevel
                 clip: true
+                boundsBehavior: Flickable.StopAtBounds
 
-                Column {
-                    id: desktopColumn
-                    width: parent.width
-                    spacing: units.gu(2)
+                PinchArea {
+                    width: Math.max(flickable.contentWidth, flickable.width)
+                    height: Math.max(flickable.contentHeight, flickable.height)
 
-                    // Instructions
-                    Label {
-                        width: parent.width
-                        anchors.margins: units.gu(2)
-                        text: i18n.tr("View your desktop screen. Tap the refresh button to update.")
-                        wrapMode: Text.WordWrap
-                        fontSize: "small"
-                        color: theme.palette.normal.backgroundSecondaryText
-                        horizontalAlignment: Text.AlignHCenter
+                    property real initialZoom: 1.0
+
+                    onPinchStarted: {
+                        initialZoom = remoteDesktop.zoomLevel
                     }
 
-                    // Loading indicator
-                    ActivityIndicator {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        running: remoteDesktop.loading
-                        visible: remoteDesktop.loading
+                    onPinchUpdated: {
+                        var newZoom = initialZoom * pinch.scale
+                        // Limit zoom between 0.5x and 4.0x
+                        remoteDesktop.zoomLevel = Math.max(0.5, Math.min(4.0, newZoom))
                     }
 
-                    // Desktop screenshot viewer
-                    Rectangle {
-                        width: parent.width
-                        height: desktopImage.height
-                        color: theme.palette.normal.background
+                    Image {
+                        id: desktopImage
+                        width: flickable.width
+                        height: desktopImage.implicitHeight * (flickable.width / desktopImage.implicitWidth)
+                        fillMode: Image.PreserveAspectFit
+                        source: remoteDesktop.currentImageData ? "data:image/jpeg;base64," + remoteDesktop.currentImageData : ""
+                        scale: remoteDesktop.zoomLevel
+                        transformOrigin: Item.TopLeft
+                        
+                        property real desktopWidth: 1280  // Will be updated from server
+                        property real desktopHeight: 720
+                        
+                        Label {
+                            anchors.centerIn: parent
+                            visible: !remoteDesktop.currentImageData && !remoteDesktop.loading
+                            text: i18n.tr("Tap refresh to capture desktop screen")
+                            color: theme.palette.normal.backgroundSecondaryText
+                        }
 
-                        Image {
-                            id: desktopImage
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-                            fillMode: Image.PreserveAspectFit
-                            source: remoteDesktop.currentImageData ? "data:image/jpeg;base64," + remoteDesktop.currentImageData : ""
+                        ActivityIndicator {
+                            anchors.centerIn: parent
+                            running: remoteDesktop.loading
+                            visible: remoteDesktop.loading
+                        }
+                        
+                        // Mouse area for click detection
+                        MouseArea {
+                            anchors.fill: parent
+                            enabled: remoteDesktop.currentImageData !== ""
                             
-                            property real desktopWidth: 1280  // Will be updated from server
-                            property real desktopHeight: 720
-                            
-                            Label {
-                                anchors.centerIn: parent
-                                visible: !remoteDesktop.currentImageData && !remoteDesktop.loading
-                                text: i18n.tr("Tap refresh to capture desktop screen")
-                                color: theme.palette.normal.backgroundSecondaryText
-                            }
-                            
-                            // Mouse area for click detection
-                            MouseArea {
-                                anchors.fill: parent
-                                enabled: remoteDesktop.currentImageData !== ""
+                            onClicked: {
+                                // Calculate actual desktop coordinates accounting for zoom
+                                var scaleX = desktopImage.desktopWidth / desktopImage.paintedWidth
+                                var scaleY = desktopImage.desktopHeight / desktopImage.paintedHeight
                                 
-                                onClicked: {
-                                    // Calculate actual desktop coordinates
-                                    // Account for image scaling
-                                    var scaleX = desktopImage.desktopWidth / desktopImage.paintedWidth
-                                    var scaleY = desktopImage.desktopHeight / desktopImage.paintedHeight
-                                    
-                                    // Calculate offset if image is centered
-                                    var offsetX = (desktopImage.width - desktopImage.paintedWidth) / 2
-                                    var offsetY = (desktopImage.height - desktopImage.paintedHeight) / 2
-                                    
-                                    var desktopX = Math.floor((mouse.x - offsetX) * scaleX)
-                                    var desktopY = Math.floor((mouse.y - offsetY) * scaleY)
-                                    
-                                    console.log("Click at phone coords:", mouse.x, mouse.y)
-                                    console.log("Translated to desktop coords:", desktopX, desktopY)
-                                    console.log("Scale:", scaleX, scaleY, "Offset:", offsetX, offsetY)
-                                    
-                                    // Send click to desktop
-                                    sshManager.sendMouseEvent(
-                                        remoteDesktop.hostAddress,
-                                        remoteDesktop.portNumber,
-                                        "click",
-                                        desktopX,
-                                        desktopY,
-                                        "left"
-                                    )
-                                    
-                                    addLog("Clicked at (" + desktopX + ", " + desktopY + ")", "info")
-                                }
+                                // Calculate offset if image is centered
+                                var offsetX = (desktopImage.width - desktopImage.paintedWidth) / 2
+                                var offsetY = (desktopImage.height - desktopImage.paintedHeight) / 2
                                 
-                                onPressAndHold: {
-                                    // Right click on long press
-                                    var scaleX = desktopImage.desktopWidth / desktopImage.paintedWidth
-                                    var scaleY = desktopImage.desktopHeight / desktopImage.paintedHeight
-                                    var offsetX = (desktopImage.width - desktopImage.paintedWidth) / 2
-                                    var offsetY = (desktopImage.height - desktopImage.paintedHeight) / 2
-                                    var desktopX = Math.floor((mouse.x - offsetX) * scaleX)
-                                    var desktopY = Math.floor((mouse.y - offsetY) * scaleY)
-                                    
-                                    sshManager.sendMouseEvent(
-                                        remoteDesktop.hostAddress,
-                                        remoteDesktop.portNumber,
-                                        "click",
-                                        desktopX,
-                                        desktopY,
-                                        "right"
-                                    )
-                                    
-                                    addLog("Right-clicked at (" + desktopX + ", " + desktopY + ")", "info")
-                                }
+                                var desktopX = Math.floor((mouse.x - offsetX) * scaleX)
+                                var desktopY = Math.floor((mouse.y - offsetY) * scaleY)
+                                
+                                console.log("Click at phone coords:", mouse.x, mouse.y)
+                                console.log("Translated to desktop coords:", desktopX, desktopY)
+                                console.log("Scale:", scaleX, scaleY, "Offset:", offsetX, offsetY)
+                                console.log("Zoom level:", remoteDesktop.zoomLevel)
+                                
+                                // Send click to desktop
+                                sshManager.sendMouseEvent(
+                                    remoteDesktop.hostAddress,
+                                    remoteDesktop.portNumber,
+                                    "click",
+                                    desktopX,
+                                    desktopY,
+                                    "left"
+                                )
+                                
+                                addLog("Clicked at (" + desktopX + ", " + desktopY + ")", "info")
+                            }
+                            
+                            onPressAndHold: {
+                                // Right click on long press
+                                var scaleX = desktopImage.desktopWidth / desktopImage.paintedWidth
+                                var scaleY = desktopImage.desktopHeight / desktopImage.paintedHeight
+                                var offsetX = (desktopImage.width - desktopImage.paintedWidth) / 2
+                                var offsetY = (desktopImage.height - desktopImage.paintedHeight) / 2
+                                var desktopX = Math.floor((mouse.x - offsetX) * scaleX)
+                                var desktopY = Math.floor((mouse.y - offsetY) * scaleY)
+                                
+                                sshManager.sendMouseEvent(
+                                    remoteDesktop.hostAddress,
+                                    remoteDesktop.portNumber,
+                                    "click",
+                                    desktopX,
+                                    desktopY,
+                                    "right"
+                                )
+                                
+                                addLog("Right-clicked at (" + desktopX + ", " + desktopY + ")", "info")
                             }
                         }
                     }
+                }
+            }
 
-                    // Refresh Button
+            // Control bar at bottom
+            Rectangle {
+                id: controlBar
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                }
+                height: units.gu(8)
+                color: theme.palette.normal.background
+
+                Row {
+                    anchors.centerIn: parent
+                    spacing: units.gu(2)
+
+                    Label {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: i18n.tr("Zoom: ") + Math.round(remoteDesktop.zoomLevel * 100) + "%"
+                        fontSize: "small"
+                    }
+
                     Button {
-                        width: parent.width
-                        anchors.margins: units.gu(2)
-                        text: i18n.tr("Refresh Screenshot")
-                        color: theme.palette.normal.positive
+                        text: i18n.tr("⌨️")
+                        width: units.gu(6)
+                        onClicked: pageStack.push(keyboardPage)
+                    }
+
+                    Button {
+                        text: i18n.tr("Refresh")
                         onClicked: remoteDesktop.captureDesktopScreen()
+                    }
+
+                    Button {
+                        text: i18n.tr("Reset Zoom")
+                        onClicked: remoteDesktop.zoomLevel = 1.0
+                    }
+
+                    Button {
+                        text: i18n.tr("Close")
+                        onClicked: pageStack.pop()
+                    }
+                }
+            }
+
+            // Virtual Keyboard Page
+            Page {
+                id: keyboardPage
+                visible: false
+                
+                header: PageHeader {
+                    title: i18n.tr('Virtual Keyboard')
+                    
+                    trailingActionBar.actions: [
+                        Action {
+                            iconName: "close"
+                            text: i18n.tr("Close")
+                            onTriggered: pageStack.pop()
+                        }
+                    ]
+                }
+
+                Flickable {
+                    anchors {
+                        top: parent.header.bottom
+                        left: parent.left
+                        right: parent.right
+                        bottom: parent.bottom
+                    }
+                    contentHeight: keyboardColumn.height + units.gu(4)
+                    
+                    Column {
+                        id: keyboardColumn
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            top: parent.top
+                            margins: units.gu(2)
+                        }
+                        spacing: units.gu(2)
+                        
+                        Label {
+                            width: parent.width
+                            text: i18n.tr("Type text to send to your desktop:")
+                            wrapMode: Text.WordWrap
+                        }
+                        
+                        TextField {
+                            id: kbTextField
+                            width: parent.width
+                            placeholderText: i18n.tr("Type here...")
+                        }
+                        
+                        Button {
+                            width: parent.width
+                            text: i18n.tr("Send Text")
+                            color: theme.palette.normal.positive
+                            onClicked: {
+                                console.log("QML: Send Text clicked!")
+                                var text = kbTextField.text
+                                console.log("QML: Text:", text)
+                                
+                                if (text && text.length > 0) {
+                                    console.log("QML: Sending to desktop...")
+                                    sshManager.sendKeyboardInput(
+                                        remoteDesktop.hostAddress,
+                                        remoteDesktop.portNumber,
+                                        text,
+                                        ""
+                                    )
+                                    kbTextField.text = ""
+                                    addLog("Sent text: " + text, "info")
+                                } else {
+                                    console.log("QML: No text to send")
+                                }
+                            }
+                        }
+                        
+                        Label {
+                            width: parent.width
+                            text: i18n.tr("Special Keys:")
+                            fontSize: "medium"
+                        }
+                        
+                        Row {
+                            width: parent.width
+                            spacing: units.gu(1)
+                            
+                            Button {
+                                width: (parent.width - units.gu(2)) / 3
+                                text: i18n.tr("Enter")
+                                onClicked: {
+                                    console.log("QML: Enter pressed")
+                                    sshManager.sendKeyboardInput(
+                                        remoteDesktop.hostAddress,
+                                        remoteDesktop.portNumber,
+                                        "",
+                                        "enter"
+                                    )
+                                    addLog("Sent Enter key", "info")
+                                }
+                            }
+                            
+                            Button {
+                                width: (parent.width - units.gu(2)) / 3
+                                text: i18n.tr("Tab")
+                                onClicked: {
+                                    console.log("QML: Tab pressed")
+                                    sshManager.sendKeyboardInput(
+                                        remoteDesktop.hostAddress,
+                                        remoteDesktop.portNumber,
+                                        "",
+                                        "tab"
+                                    )
+                                    addLog("Sent Tab key", "info")
+                                }
+                            }
+                            
+                            Button {
+                                width: (parent.width - units.gu(2)) / 3
+                                text: i18n.tr("Esc")
+                                onClicked: {
+                                    console.log("QML: Esc pressed")
+                                    sshManager.sendKeyboardInput(
+                                        remoteDesktop.hostAddress,
+                                        remoteDesktop.portNumber,
+                                        "",
+                                        "esc"
+                                    )
+                                    addLog("Sent Esc key", "info")
+                                }
+                            }
+                        }
+                        
+                        Row {
+                            width: parent.width
+                            spacing: units.gu(1)
+                            
+                            Button {
+                                width: (parent.width - units.gu(1)) / 2
+                                text: i18n.tr("Backspace")
+                                onClicked: {
+                                    console.log("QML: Backspace pressed")
+                                    sshManager.sendKeyboardInput(
+                                        remoteDesktop.hostAddress,
+                                        remoteDesktop.portNumber,
+                                        "",
+                                        "backspace"
+                                    )
+                                    addLog("Sent Backspace key", "info")
+                                }
+                            }
+                            
+                            Button {
+                                width: (parent.width - units.gu(1)) / 2
+                                text: i18n.tr("Delete")
+                                onClicked: {
+                                    console.log("QML: Delete pressed")
+                                    sshManager.sendKeyboardInput(
+                                        remoteDesktop.hostAddress,
+                                        remoteDesktop.portNumber,
+                                        "",
+                                        "delete"
+                                    )
+                                    addLog("Sent Delete key", "info")
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1298,9 +1496,12 @@ MainView {
         
         onScreenshotReady: {
             console.log("QML: Screenshot received, data length:", imageData.length)
+            console.log("QML: Desktop resolution:", width, "x", height)
             remoteDesktop.currentImageData = imageData
+            desktopImage.desktopWidth = width
+            desktopImage.desktopHeight = height
             remoteDesktop.loading = false
-            addLog("Screenshot captured successfully", "success")
+            addLog("Screenshot captured (" + width + "x" + height + ")", "success")
         }
         
         onMouseControlResult: {

@@ -41,7 +41,7 @@ signals:
     void uploadProgress(const QString &filename, int progress);
     void uploadComplete(const QString &filename);
     void fileError(const QString &error);
-    void screenshotReady(const QString &imageData);
+    void screenshotReady(const QString &imageData, int width, int height);
     void mouseControlResult(bool success, const QString &message);
     void keyboardInputResult(bool success, const QString &message);
 

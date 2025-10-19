@@ -355,6 +355,10 @@ class MonitorHandler(BaseHTTPRequestHandler):
             # Capture the screen
             screenshot = ImageGrab.grab()
             
+            # Store original desktop dimensions
+            original_width = screenshot.width
+            original_height = screenshot.height
+            
             # Convert to JPEG for better compression
             buffer = BytesIO()
             # Resize to reduce bandwidth (adjust quality/size as needed)
@@ -374,8 +378,10 @@ class MonitorHandler(BaseHTTPRequestHandler):
                 'success': True,
                 'image': screenshot_base64,
                 'format': 'jpeg',
-                'width': screenshot.width,
-                'height': screenshot.height
+                'width': original_width,
+                'height': original_height,
+                'thumbnail_width': screenshot.width,
+                'thumbnail_height': screenshot.height
             }).encode())
             
         except Exception as e:

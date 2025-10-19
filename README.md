@@ -4,20 +4,20 @@ A tool to monitor and manage your Linux desktop from your Ubuntu Touch device vi
 
 ## Features
 
-- 🔌 Connect to your Linux desktop via HTTP (no SSH required!)
-- 📊 Real-time system metrics:
+- Connect to your Linux desktop via HTTP (no SSH required!)
+- Real-time system metrics:
   - Hostname
   - Uptime
   - CPU usage
   - RAM usage
   - Temperature (if available)
-- 📁 File browser to explore your desktop files
-- ⬇️ Download files from desktop to your Ubuntu Touch device
-- ⬆️ Upload files from Ubuntu Touch to your desktop
-- ⚠️ Remote shutdown capability
-- 🔒 Optional authentication token for security
-- 🔄 Refresh metrics on demand
-- 💾 Saves connection settings
+- File browser to explore your desktop files
+- Download files from desktop to your Ubuntu Touch device
+- Upload files from Ubuntu Touch to your desktop
+- Remote shutdown capability
+- Optional authentication token for security
+- Refresh metrics on demand
+- Saves connection settings
 
 ## Building and Testing
 
@@ -37,16 +37,44 @@ This will build the app and install it on your device/emulator.
 
 ### Desktop Setup
 
-Download the server script from the app's documentation or GitHub repository, then run it on your Linux desktop:
+Download the server script from the app's documentation or GitHub repository, then run it on your Linux desktop.
+
+#### Option 1: Using Virtual Environment (Recommended)
 
 ```bash
-# Install required dependencies
-pip3 install pillow pyautogui --break-system-packages
+# Create a virtual environment
+python3 -m venv monitor-env
 
+# Activate it
+source monitor-env/bin/activate
+
+# Install dependencies
+pip install pillow pyautogui
+
+# Run the server
+python3 desktop_monitor_server.py
+
+# When done, deactivate
+deactivate
+```
+
+#### Option 2: System-wide Install
+
+```bash
+# Install dependencies system-wide
+# Note: Use this if you understand the implications or if your system allows it
+pip3 install pillow pyautogui --break-system-packages
+```
+
+**Note on `--break-system-packages`**: This flag is needed on modern Linux distributions (Python 3.11+) that use externally-managed Python environments. While Pillow and pyautogui are safe libraries, using a virtual environment (Option 1) is the recommended best practice to avoid any potential conflicts with system packages.
+
+#### Server Usage
+
+```bash
 # Basic usage (no authentication)
 python3 desktop_monitor_server.py
 
-# With authentication token
+# With authentication token for security
 python3 desktop_monitor_server.py --token mysecrettoken123
 
 # Custom port
@@ -58,9 +86,10 @@ python3 desktop_monitor_server.py --files-root ~/Documents
 
 The server will display your IP address that you'll use in the app.
 
-**Note**: The `--break-system-packages` flag is required on modern Linux distributions (Python 3.11+) and is safe for these user-space libraries.
+#### Optional: Temperature Monitoring
 
-**Optional: Install sensors for temperature monitoring**
+For CPU/system temperature monitoring, install lm-sensors:
+
 ```bash
 sudo apt install lm-sensors
 sudo sensors-detect
@@ -68,10 +97,7 @@ sudo sensors-detect
 
 ## Usage
 
-1. **Install dependencies on your desktop**:
-   ```bash
-   pip3 install pillow pyautogui --break-system-packages
-   ```
+1. **Complete the Desktop Setup** (see above)
 
 2. **Start the server on your desktop**: 
    ```bash
@@ -90,64 +116,11 @@ sudo sensors-detect
 
 8. **Upload Files**: Send files from your device to your desktop
 
-9. **Shutdown**: Remotely shutdown your desktop when needed
+9. **Remote Desktop Control**: 
+   - View your desktop screen in real-time
+   - Control with touch (click, right-click, scroll)
+   - Pinch to zoom for precise control
+   - Virtual keyboard for text input
+   - Special keys: Enter, Tab, Esc, Backspace, Delete
 
-## Current Status
-
-**Version 1.0.0** ✅
-- ✅ System monitoring (CPU, RAM, uptime, temperature)
-- ✅ File browser with navigation
-- ✅ Download files from desktop to device
-- ✅ Upload files from device to desktop
-- ✅ Remote shutdown capability
-- ✅ Optional authentication token
-- ✅ Connection settings persistence
-
-**Future Features** (Planned)
-- Multiple desktop profiles
-- Background monitoring with notifications
-- Scheduled tasks
-
-## Development Notes
-
-This app uses a **client-server architecture**:
-
-- **Frontend**: QML + C++ (Qt5) for the Ubuntu Touch app
-- **Backend**: Python HTTP server (`desktop_monitor_server.py`) running on your desktop
-- **Communication**: HTTP/JSON API with base64 file encoding
-- **Build system**: Clickable (handles all packaging automatically)
-- **Security**: Works perfectly with Ubuntu Touch's AppArmor confinement model
-
-## Troubleshooting
-
-**"Connection failed"**
-- Verify the server is running on your desktop
-- Check firewall settings (port 8080 by default must be open)
-- Ensure you entered the correct IP address
-- If using authentication, verify the token matches
-
-**"Network error"**
-- Ensure both devices are on the same network
-- Check if you can ping the desktop from your phone
-- Try accessing `http://DESKTOP_IP:8080/metrics` from a browser
-
-**"File operation error"**
-- Files can only be uploaded from the app's folder due to Ubuntu Touch permissions
-- Download a file to the app first, then you can upload it back
-- Check the debug logs for detailed error messages
-
-## License
-
-Copyright (C) 2025  Yomen Tohmaz
-
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License version 3, as published by the
-Free Software Foundation.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranties of MERCHANTABILITY, SATISFACTORY
-QUALITY, or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program. If not, see <http://www.gnu.org/licenses/>.
+10. **Shutdown**: Remotely shutdown your desktop when needed

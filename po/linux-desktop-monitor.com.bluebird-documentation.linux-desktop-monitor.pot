@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: linux-desktop-monitor.com.bluebird-documentation.linux-"
 "desktop-monitor\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-18 23:34+0000\n"
+"POT-Creation-Date: 2025-10-19 00:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -88,7 +88,7 @@ msgstr ""
 msgid "Temperature: "
 msgstr ""
 
-#: ../qml/Main.qml:334 ../qml/Main.qml:820
+#: ../qml/Main.qml:334 ../qml/Main.qml:820 ../qml/Main.qml:987
 msgid "Refresh"
 msgstr ""
 
@@ -109,6 +109,7 @@ msgid "Setup Guide"
 msgstr ""
 
 #: ../qml/Main.qml:390 ../qml/Main.qml:642 ../qml/Main.qml:825
+#: ../qml/Main.qml:997 ../qml/Main.qml:1014
 msgid "Close"
 msgstr ""
 
@@ -200,35 +201,79 @@ msgstr ""
 msgid "Remote Desktop"
 msgstr ""
 
-#: ../qml/Main.qml:863
-msgid "View your desktop screen. Tap the refresh button to update."
-msgstr ""
-
-#: ../qml/Main.qml:898
+#: ../qml/Main.qml:889
 msgid "Tap refresh to capture desktop screen"
 msgstr ""
 
-#: ../qml/Main.qml:965
-msgid "Refresh Screenshot"
+#: ../qml/Main.qml:976
+msgid "Zoom: "
 msgstr ""
 
-#: ../qml/Main.qml:986
+#: ../qml/Main.qml:981
+msgid "⌨️"
+msgstr ""
+
+#: ../qml/Main.qml:992
+msgid "Reset Zoom"
+msgstr ""
+
+#: ../qml/Main.qml:1009
+msgid "Virtual Keyboard"
+msgstr ""
+
+#: ../qml/Main.qml:1041
+msgid "Type text to send to your desktop:"
+msgstr ""
+
+#: ../qml/Main.qml:1048
+msgid "Type here..."
+msgstr ""
+
+#: ../qml/Main.qml:1053
+msgid "Send Text"
+msgstr ""
+
+#: ../qml/Main.qml:1078
+msgid "Special Keys:"
+msgstr ""
+
+#: ../qml/Main.qml:1088
+msgid "Enter"
+msgstr ""
+
+#: ../qml/Main.qml:1103
+msgid "Tab"
+msgstr ""
+
+#: ../qml/Main.qml:1118
+msgid "Esc"
+msgstr ""
+
+#: ../qml/Main.qml:1138
+msgid "Backspace"
+msgstr ""
+
+#: ../qml/Main.qml:1153
+msgid "Delete"
+msgstr ""
+
+#: ../qml/Main.qml:1184
 msgid "Download File"
 msgstr ""
 
-#: ../qml/Main.qml:994
+#: ../qml/Main.qml:1192
 msgid "File: "
 msgstr ""
 
-#: ../qml/Main.qml:1000
+#: ../qml/Main.qml:1198
 msgid "Save to:"
 msgstr ""
 
-#: ../qml/Main.qml:1008
+#: ../qml/Main.qml:1206
 msgid "Enter destination path"
 msgstr ""
 
-#: ../qml/Main.qml:1013
+#: ../qml/Main.qml:1211
 msgid ""
 "Files save to app folder by default.\n"
 "\n"
@@ -239,81 +284,81 @@ msgid ""
 "Or copy path from logs after download."
 msgstr ""
 
-#: ../qml/Main.qml:1021 ../qml/Main.qml:1123 ../qml/Main.qml:1394
+#: ../qml/Main.qml:1219 ../qml/Main.qml:1321 ../qml/Main.qml:1595
 msgid "Cancel"
 msgstr ""
 
-#: ../qml/Main.qml:1026
+#: ../qml/Main.qml:1224
 msgid "Download"
 msgstr ""
 
-#: ../qml/Main.qml:1047
+#: ../qml/Main.qml:1245
 msgid "Upload File to Desktop"
 msgstr ""
 
-#: ../qml/Main.qml:1055
+#: ../qml/Main.qml:1253
 msgid "Destination on Desktop:"
 msgstr ""
 
-#: ../qml/Main.qml:1070
+#: ../qml/Main.qml:1268
 msgid ""
 "ℹ️ The file will be uploaded to the folder shown above on your desktop where "
 "the server is running."
 msgstr ""
 
-#: ../qml/Main.qml:1084
+#: ../qml/Main.qml:1282
 msgid "File path on your phone:"
 msgstr ""
 
-#: ../qml/Main.qml:1128
+#: ../qml/Main.qml:1326
 msgid "Upload"
 msgstr ""
 
-#: ../qml/Main.qml:1227
+#: ../qml/Main.qml:1425
 msgid "Connected successfully!"
 msgstr ""
 
-#: ../qml/Main.qml:1237
+#: ../qml/Main.qml:1435
 msgid "Error: "
 msgstr ""
 
-#: ../qml/Main.qml:1248
+#: ../qml/Main.qml:1446
 msgid "Desktop shutdown initiated"
 msgstr ""
 
-#: ../qml/Main.qml:1252
+#: ../qml/Main.qml:1450
 msgid "Shutdown failed: "
 msgstr ""
 
-#: ../qml/Main.qml:1268
+#: ../qml/Main.qml:1466
 msgid "Downloaded: "
 msgstr ""
 
-#: ../qml/Main.qml:1282
+#: ../qml/Main.qml:1480
 msgid "Uploaded: "
 msgstr ""
 
-#: ../qml/Main.qml:1332
+#: ../qml/Main.qml:1533
 msgid "Connecting..."
 msgstr ""
 
-#: ../qml/Main.qml:1356
+#: ../qml/Main.qml:1557
 msgid "Error: Connection manager not available - "
 msgstr ""
 
-#: ../qml/Main.qml:1389
+#: ../qml/Main.qml:1590
 msgid "Shutdown Desktop?"
 msgstr ""
 
-#: ../qml/Main.qml:1390
+#: ../qml/Main.qml:1591
 msgid "This will shutdown your desktop computer "
 msgstr ""
 
-#: ../qml/Main.qml:1391
+#: ../qml/Main.qml:1592
 msgid ". Are you sure?"
 msgstr ""
 
-#: ../qml/Main.qml:1399
+#: ../qml/Main.qml:1600
 msgid "Shutdown"
 msgstr ""
 
